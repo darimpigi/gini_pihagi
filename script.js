@@ -112,20 +112,19 @@ filterBtn.addEventListener('click', () => {
 
     if (isWaterMode) {
         poopImg.src = 'images/water.png';
-        gameOverImg.src = selectedCharacter.gameOverSrcWater; // 💡 클린 모드용 게임오버 이미지
+        gameOverImg.src = selectedCharacter.gameOverSrcWater;
         filterImg.src = 'images/poop.png';
         filterImg.classList.add('censored');
         tFilterText.innerText = lang.filterPoop;
     } else {
         poopImg.src = selectedCharacter.poopSrc;
-        gameOverImg.src = selectedCharacter.gameOverSrc;      // 💡 똥 모드용 원본 게임오버 이미지
+        gameOverImg.src = selectedCharacter.gameOverSrc;      
         filterImg.src = 'images/water.png';
         filterImg.classList.remove('censored');
         tFilterText.innerText = lang.filterWater;
     }
 });
 
-// 💡 각 캐릭터별 water 버전 게임오버 이미지 추가
 const characters = [
     { src: 'images/gini_1.png', width: 40, height: 30, gameOverSrc: 'images/game_over_gini_1.png', gameOverSrcWater: 'images/game_over_gini_1_water.png', poopSrc: 'images/poop.png', soundType: 'gini' },
     { src: 'images/gini_2.png', width: 40, height: 30, gameOverSrc: 'images/game_over_gini_2.png', gameOverSrcWater: 'images/game_over_gini_2_water.png', poopSrc: 'images/poop.png', soundType: 'gini' },
@@ -212,6 +211,7 @@ if (restartGameBtn) {
     });
 }
 
+// 💡 캡쳐 에러를 방지하고 X 공유를 무조건 실행하도록 로직 대폭 강화
 function captureGameBox(callback) {
     const gameContainer = document.getElementById('game-container');
     const btnGroup = document.querySelector('.share-btn-group');
@@ -219,18 +219,33 @@ function captureGameBox(callback) {
     btnGroup.style.display = 'none'; 
 
     if (typeof html2canvas !== 'undefined') {
-        html2canvas(gameContainer, { scale: 2, backgroundColor: null }).then(canvas => {
+        html2canvas(gameContainer, { 
+            scale: 2, 
+            backgroundColor: null,
+            useCORS: true // 보안 이슈 최소화를 위해 추가
+        }).then(canvas => {
             btnGroup.style.display = 'flex';
 
             const link = document.createElement('a');
-            link.download = `dodge_game_score_${score}.png`;
+            link.download = `GINI_PIHAGI_SCORE_${score}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
 
-            if (callback) callback();
+            if (callback) callback(); // X 공유 무사히 실행
         }).catch(err => {
+            // 💡 로컬(file://) 환경 등에서 캡쳐가 막혔을 때의 처리
             btnGroup.style.display = 'flex';
+            if (callback) {
+                // X 공유 버튼을 눌렀다면 캡쳐를 건너뛰고 텍스트 공유라도 띄우기
+                callback(); 
+            } else {
+                // 단순 이미지 저장 버튼을 눌렀다면 이유 설명
+                alert(currentLang === 'kr' ? "컴퓨터 폴더에서 직접 열어 보안 정책으로 인해 이미지를 저장할 수 없습니다.\n\n(웹에 배포된 후에는 정상적으로 저장됩니다!)" : "Cannot save image in local environment due to CORS policy.");
+            }
         });
+    } else {
+        btnGroup.style.display = 'flex';
+        if (callback) callback();
     }
 }
 
@@ -266,6 +281,7 @@ if (copyBtn) {
 if (shareXBtn) {
     shareXBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        // 💡 캡쳐(captureGameBox)가 실패하더라도 아래의 콜백 함수는 반드시 실행되게 수정했습니다!
         captureGameBox(() => {
             const gameUrl = window.location.href;
             let fullText = "";
@@ -290,7 +306,6 @@ function initSelectedCharacter() {
     player.y = FLOOR_Y - player.height; 
     player.facingRight = false; 
 
-    // 💡 초기화 시 현재 모드에 따라 게임오버 이미지 분기 처리
     if (isWaterMode) {
         poopImg.src = 'images/water.png';
         gameOverImg.src = selectedCharacter.gameOverSrcWater;
