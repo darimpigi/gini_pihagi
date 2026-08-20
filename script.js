@@ -27,7 +27,12 @@ const char1Btn = document.getElementById('char1-btn');
 const char2Btn = document.getElementById('char2-btn');
 const char3Btn = document.getElementById('char3-btn');
 
+const filterBtn = document.getElementById('filter-btn');
+const filterImg = document.getElementById('filter-img');
+const tFilterText = document.getElementById('t-filterText');
+
 let isSoundOn = true;
+let isWaterMode = false; 
 
 const audioCache = { gini: [], rabbit: [] };
 try {
@@ -57,7 +62,9 @@ const i18n = {
         gameover: "GAME OVER", finalScore: "SCORE: ", finalBest: "BEST: ",
         restart: "✨ Change Character ✨", 
         selectChar: "SELECT<br>CHAR",
-        captureBtn: "Save Image", copyBtn: "Copy Result", shareXBtn: "Share on X", restartGameBtn: "RESTART"
+        captureBtn: "Save Image", copyBtn: "Copy Result", shareXBtn: "Share on X", restartGameBtn: "RESTART",
+        filterWater: "CLEAN MODE", 
+        filterPoop: "POOP MODE"   
     },
     kr: {
         score: "점수 ", best: "최고 ", title: "똥 피하기",
@@ -65,7 +72,9 @@ const i18n = {
         gameover: "게임 오버", finalScore: "점수: ", finalBest: "최고: ",
         restart: "✨ 캐릭터 변경 가능 ✨", 
         selectChar: "캐릭터<br>선택",
-        captureBtn: "이미지 저장", copyBtn: "결과 복사", shareXBtn: "X 공유", restartGameBtn: "다시 시작"
+        captureBtn: "이미지 저장", copyBtn: "결과 복사", shareXBtn: "X 공유", restartGameBtn: "다시 시작",
+        filterWater: "클린 모드",
+        filterPoop: "똥 모드"
     }
 };
 
@@ -84,6 +93,7 @@ function applyLanguage() {
     document.getElementById('t-finalBest').innerText = lang.finalBest;
     document.getElementById('t-restart').innerText = lang.restart; 
     document.getElementById('t-selectChar').innerHTML = lang.selectChar;
+    tFilterText.innerText = isWaterMode ? lang.filterPoop : lang.filterWater; 
     
     if (captureBtn) captureBtn.innerText = lang.captureBtn;
     if (copyBtn) copyBtn.innerText = lang.copyBtn;
@@ -96,10 +106,30 @@ langBtn.addEventListener('click', () => {
     applyLanguage();
 });
 
+filterBtn.addEventListener('click', () => {
+    isWaterMode = !isWaterMode;
+    const lang = i18n[currentLang];
+
+    if (isWaterMode) {
+        poopImg.src = 'images/water.png';
+        gameOverImg.src = selectedCharacter.gameOverSrcWater; // 💡 클린 모드용 게임오버 이미지
+        filterImg.src = 'images/poop.png';
+        filterImg.classList.add('censored');
+        tFilterText.innerText = lang.filterPoop;
+    } else {
+        poopImg.src = selectedCharacter.poopSrc;
+        gameOverImg.src = selectedCharacter.gameOverSrc;      // 💡 똥 모드용 원본 게임오버 이미지
+        filterImg.src = 'images/water.png';
+        filterImg.classList.remove('censored');
+        tFilterText.innerText = lang.filterWater;
+    }
+});
+
+// 💡 각 캐릭터별 water 버전 게임오버 이미지 추가
 const characters = [
-    { src: 'images/gini_1.png', width: 40, height: 30, gameOverSrc: 'images/game_over_gini_1.png', poopSrc: 'images/poop.png', soundType: 'gini' },
-    { src: 'images/gini_2.png', width: 40, height: 30, gameOverSrc: 'images/game_over_gini_2.png', poopSrc: 'images/poop.png', soundType: 'gini' },
-    { src: 'images/rabbit.png', width: 60, height: 50, gameOverSrc: 'images/game_over_rabbit.png', poopSrc: 'images/poop_rabbit.png', soundType: 'rabbit' },
+    { src: 'images/gini_1.png', width: 40, height: 30, gameOverSrc: 'images/game_over_gini_1.png', gameOverSrcWater: 'images/game_over_gini_1_water.png', poopSrc: 'images/poop.png', soundType: 'gini' },
+    { src: 'images/gini_2.png', width: 40, height: 30, gameOverSrc: 'images/game_over_gini_2.png', gameOverSrcWater: 'images/game_over_gini_2_water.png', poopSrc: 'images/poop.png', soundType: 'gini' },
+    { src: 'images/rabbit.png', width: 60, height: 50, gameOverSrc: 'images/game_over_rabbit.png', gameOverSrcWater: 'images/game_over_rabbit_water.png', poopSrc: 'images/poop_rabbit.png', soundType: 'rabbit' },
 ];
 
 let selectedCharacter = characters[0]; 
@@ -219,7 +249,6 @@ if (copyBtn) {
         const gameUrl = window.location.href;
         let shareText = "";
         
-        // 💡 트위터 앱 등을 고려하여 강제 줄바꿈(\r\n) 사용
         if (currentLang === 'kr') {
             shareText = `기니 똥피하기에서 ${score}점을 달성했어요!\r\n내 기록을 넘어보세요!\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
         } else {
@@ -241,7 +270,6 @@ if (shareXBtn) {
             const gameUrl = window.location.href;
             let fullText = "";
 
-            // 💡 트위터가 문단을 강제로 붙이는 것을 방지하기 위해 \r\n(CRLF) 사용
             if (currentLang === 'kr') {
                 fullText = `기니 똥피하기에서 ${score}점을 달성했어요!\r\n내 기록을 넘어보세요!\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
             } else {
@@ -262,8 +290,14 @@ function initSelectedCharacter() {
     player.y = FLOOR_Y - player.height; 
     player.facingRight = false; 
 
-    poopImg.src = selectedCharacter.poopSrc;
-    gameOverImg.src = selectedCharacter.gameOverSrc;
+    // 💡 초기화 시 현재 모드에 따라 게임오버 이미지 분기 처리
+    if (isWaterMode) {
+        poopImg.src = 'images/water.png';
+        gameOverImg.src = selectedCharacter.gameOverSrcWater;
+    } else {
+        poopImg.src = selectedCharacter.poopSrc;
+        gameOverImg.src = selectedCharacter.gameOverSrc;
+    }
 }
 
 function playMoveSound() {

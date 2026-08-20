@@ -20,7 +20,6 @@ body {
     box-sizing: border-box;
 }
 
-/* 💡 게임 박스가 화면 중앙에 오도록 기준점(Relative) 설정 */
 #game-layout-wrapper {
     position: relative;
     display: flex;
@@ -286,12 +285,11 @@ canvas {
     transform: scale(0.96);
 }
 
-/* 💡 게임 박스 좌측 공중에 완벽히 띄움 (Absolute) */
 #character-selection {
     position: absolute;
-    right: 100%; /* 게임박스 왼쪽 선에 맞춤 */
-    margin-right: 20px; /* 게임박스와의 간격 */
-    top: 42px; /* 캔버스 윗선과 높이 일치 (탑바 높이 고려) */
+    right: 100%; 
+    margin-right: 20px; 
+    top: 42px; 
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -347,6 +345,33 @@ canvas {
     height: 45px;
     object-fit: contain;
     display: block;
+    transition: filter 0.3s ease;
+}
+
+/* 💡 모자이크 초강력하게 블러 처리 */
+.censored {
+    filter: blur(10px) contrast(1.2); 
+    transform: scale(0.95);
+}
+
+.mode-toggle-section {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 2px dashed #b7d8c0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* 💡 글자를 SELECT CHAR 처럼 두껍고 진하게 통일 */
+#t-filterText {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    font-weight: 800;
+    color: #4a7c59;
+    letter-spacing: 0.5px;
+    text-align: center;
 }
 
 #social-links {
@@ -375,18 +400,17 @@ canvas {
     margin: 0 15px;
 }
 
-/* 💡 화면 폭이 좁은 경우(750px 이하, 모바일/태블릿) 세로로 유동적 변경 */
 @media (max-width: 750px) {
     #game-layout-wrapper {
         flex-direction: column;
         align-items: center;
     }
     #character-selection {
-        position: relative; /* 공중에 띄운 것 해제 */
+        position: relative; 
         right: auto;
         top: auto;
         margin-right: 0;
-        margin-bottom: 20px; /* 게임 박스 위쪽 여백 */
+        margin-bottom: 20px; 
         padding: 15px 20px;
     }
     .character-options {
@@ -394,5 +418,9 @@ canvas {
     }
     #t-selectChar br {
         display: none; 
+    }
+    .mode-toggle-section {
+        margin-top: 15px;
+        padding-top: 15px;
     }
 }
