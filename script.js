@@ -211,19 +211,21 @@ if (captureBtn) {
     });
 }
 
+// 💡 공통 해시태그 변수
+const commonHashtagsText = "#기니똥피하기 #기니피하기 #gini_pihagi #gini_poop_dodge #darim_pigi";
+
 if (copyBtn) {
     copyBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const gameUrl = window.location.href;
         
-        // 💡 모든 언어에서 동일한 해시태그 사용
-        const commonHashtags = "#기니똥피하기 #기니피하기 #gini_pihagi #gini_poop_dodge #darim_pigi";
         let shareText = "";
         
+        // 💡 본문, 주소, 해시태그 사이에 각각 빈 줄(\n\n) 추가
         if (currentLang === 'kr') {
-            shareText = `기니 똥피하기에서 ${score}점을 달성했어요!\n내 기록을 넘어보세요!\n👉 ${gameUrl}\n\n${commonHashtags}`;
+            shareText = `기니 똥피하기에서 ${score}점을 달성했어요!\n내 기록을 넘어보세요!\n\n👉 ${gameUrl}\n\n${commonHashtagsText}`;
         } else {
-            shareText = `I scored ${score} in Poop Dodge! 💩\nCan you beat my score?\n👉 ${gameUrl}\n\n${commonHashtags}`;
+            shareText = `I scored ${score} in Poop Dodge! 💩\nCan you beat my score?\n\n👉 ${gameUrl}\n\n${commonHashtagsText}`;
         }
         
         navigator.clipboard.writeText(shareText).then(() => {
@@ -240,18 +242,16 @@ if (shareXBtn) {
         
         captureGameBox(() => {
             const gameUrl = window.location.href;
-            let text = "";
-            
-            // 💡 X(트위터) 해시태그 동일하게 고정 (쉼표로 구분)
-            let hashtags = encodeURIComponent("기니똥피하기,기니피하기,gini_pihagi,gini_poop_dodge,darim_pigi");
+            let fullText = "";
 
+            // 💡 트위터 API의 기본 배치 대신, 본문에 URL과 해시태그를 명시적으로 넣어서 간격 띄우기
             if (currentLang === 'kr') {
-                text = encodeURIComponent(`기니 똥피하기에서 ${score}점을 달성했어요!\n내 기록을 넘어보세요!`);
+                fullText = `기니 똥피하기에서 ${score}점을 달성했어요!\n내 기록을 넘어보세요!\n\n👉 ${gameUrl}\n\n${commonHashtagsText}`;
             } else {
-                text = encodeURIComponent(`I scored ${score} in Poop Dodge!\nCan you beat my score?`);
+                fullText = `I scored ${score} in Poop Dodge!\nCan you beat my score?\n\n👉 ${gameUrl}\n\n${commonHashtagsText}`;
             }
 
-            const twitterUrl = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(gameUrl)}&hashtags=${hashtags}`;
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(fullText)}`;
             window.open(twitterUrl, '_blank');
         });
     });
