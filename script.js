@@ -211,21 +211,19 @@ if (captureBtn) {
     });
 }
 
-// 💡 공통 해시태그 변수
 const commonHashtagsText = "#기니똥피하기 #기니피하기 #gini_pihagi #gini_poop_dodge #darim_pigi";
 
 if (copyBtn) {
     copyBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const gameUrl = window.location.href;
-        
         let shareText = "";
         
-        // 💡 본문, 주소, 해시태그 사이에 각각 빈 줄(\n\n) 추가
+        // 💡 트위터 앱 등을 고려하여 강제 줄바꿈(\r\n) 사용
         if (currentLang === 'kr') {
-            shareText = `기니 똥피하기에서 ${score}점을 달성했어요!\n내 기록을 넘어보세요!\n\n👉 ${gameUrl}\n\n${commonHashtagsText}`;
+            shareText = `기니 똥피하기에서 ${score}점을 달성했어요!\r\n내 기록을 넘어보세요!\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
         } else {
-            shareText = `I scored ${score} in Poop Dodge! 💩\nCan you beat my score?\n\n👉 ${gameUrl}\n\n${commonHashtagsText}`;
+            shareText = `I scored ${score} in Poop Dodge! 💩\r\nCan you beat my score?\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
         }
         
         navigator.clipboard.writeText(shareText).then(() => {
@@ -239,16 +237,15 @@ if (copyBtn) {
 if (shareXBtn) {
     shareXBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        
         captureGameBox(() => {
             const gameUrl = window.location.href;
             let fullText = "";
 
-            // 💡 트위터 API의 기본 배치 대신, 본문에 URL과 해시태그를 명시적으로 넣어서 간격 띄우기
+            // 💡 트위터가 문단을 강제로 붙이는 것을 방지하기 위해 \r\n(CRLF) 사용
             if (currentLang === 'kr') {
-                fullText = `기니 똥피하기에서 ${score}점을 달성했어요!\n내 기록을 넘어보세요!\n\n👉 ${gameUrl}\n\n${commonHashtagsText}`;
+                fullText = `기니 똥피하기에서 ${score}점을 달성했어요!\r\n내 기록을 넘어보세요!\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
             } else {
-                fullText = `I scored ${score} in Poop Dodge!\nCan you beat my score?\n\n👉 ${gameUrl}\n\n${commonHashtagsText}`;
+                fullText = `I scored ${score} in Poop Dodge!\r\nCan you beat my score?\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
             }
 
             const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(fullText)}`;
