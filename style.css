@@ -1,10 +1,7 @@
 body {
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+    /* 💡 기존의 body flex 속성을 제거하여 스크롤이 갇히는 현상 원천 차단 */
     background-color: #dceddf;
     font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
     color: #4a7c59;
@@ -17,7 +14,7 @@ body {
 
 /* 💡 가로 모드 경고창 스타일 */
 #landscape-warning {
-    display: none; /* 기본은 숨김 */
+    display: none; 
     position: fixed;
     top: 0;
     left: 0;
@@ -60,9 +57,10 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center; /* PC에서는 화면 중앙 정렬 */
     width: 100%;
-    max-width: 100vw;
-    padding: 20px;
+    min-height: 100vh;
+    padding: 30px 20px;
     box-sizing: border-box;
     overflow-x: hidden; 
 }
@@ -447,38 +445,74 @@ canvas {
     margin: 0 15px;
 }
 
+/* 💡 모바일 환경 대응 (750px 이하) */
 @media (max-width: 750px) {
+    #main-wrapper {
+        justify-content: flex-start; /* 💡 상단 잘림으로 인한 스크롤 먹통 현상 완벽 해결! */
+        padding-top: 20px;
+    }
+    
     #game-layout-wrapper {
         flex-direction: column;
         align-items: center;
     }
+    
+    /* 💡 캐릭터와 필터 모드를 직관적인 '한 줄'로 재배치 */
     #character-selection {
         position: relative; 
         right: auto;
         top: auto;
         margin-right: 0;
         margin-bottom: 20px; 
-        padding: 15px 20px;
+        padding: 10px 15px;
+        flex-direction: row; 
+        justify-content: center;
+        align-items: center;
+        width: auto;
     }
+    
+    #t-selectChar {
+        display: none; /* 공간 확보를 위해 SELECT CHAR 텍스트 숨김 */
+    }
+    
     .character-options {
         flex-direction: row; 
+        gap: 10px;
     }
-    #t-selectChar br {
-        display: none; 
-    }
+    
     .mode-toggle-section {
-        margin-top: 15px;
-        padding-top: 15px;
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+        border-left: 2px dashed #b7d8c0; /* 💡 가로 점선 대신 세로 점선으로 분리 */
+        margin-left: 12px;
+        padding-left: 12px;
+        flex-direction: column;
+        width: auto;
+    }
+    
+    #t-filterText {
+        font-size: 11px;
+        margin-bottom: 5px;
+    }
+    
+    .char-btn {
+        padding: 8px; /* 한 줄에 들어가게 패딩 약간 축소 */
+    }
+    
+    .char-btn img {
+        width: 38px;
+        height: 38px;
     }
 }
 
-/* 💡 모바일 가로 모드 감지 (스마트폰 크기에서 가로로 눕혀졌을 때) */
+/* 모바일 가로 모드 감지 */
 @media screen and (max-width: 950px) and (orientation: landscape) {
     #main-wrapper {
-        display: none; /* 메인 게임 화면을 숨김 */
+        display: none; 
     }
     #landscape-warning {
-        display: flex; /* 경고창을 띄움 */
+        display: flex; 
     }
 }
 

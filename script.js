@@ -1,4 +1,3 @@
-// 💡 1. 게임에 사용되는 모든 이미지를 백그라운드에서 미리 로딩(Preload)
 const imagePathsToPreload = [
     'images/gini_1.png', 'images/gini_2.png', 'images/rabbit.png',
     'images/game_over_gini_1.png', 'images/game_over_gini_1_water.png',
@@ -7,7 +6,7 @@ const imagePathsToPreload = [
     'images/poop.png', 'images/poop_rabbit.png', 'images/water.png',
     'images/테마배경.jpg'
 ];
-const preloadedImages = {}; // 캐싱용 객체
+const preloadedImages = {}; 
 
 imagePathsToPreload.forEach(path => {
     const img = new Image();
@@ -244,36 +243,48 @@ function forceDownload(dataUrl, fileName, callback) {
     if (callback) callback();
 }
 
+// 💡 캡쳐 로직: 아이폰 글자 밀림 및 화면 엇나감 완벽 방지
 function captureGameBox(callback) {
     const gameContainer = document.getElementById('game-container');
     const btnGroup = document.querySelector('.share-btn-group');
     
     btnGroup.style.display = 'none'; 
 
-    if (typeof html2canvas !== 'undefined') {
-        html2canvas(gameContainer, { 
-            scale: 2, 
-            backgroundColor: null,
-            useCORS: true 
-        }).then(canvas => {
-            btnGroup.style.display = 'flex';
-            const fileName = `GINI_PIHAGI_SCORE_${score}.png`;
+    // 💡 캡쳐 순간에 스크롤이 내려가 있으면 아이폰에서 글자가 밀리는 버그가 발생하므로 강제로 최상단으로 이동
+    const originalScrollY = window.scrollY;
+    window.scrollTo(0, 0);
 
-            // 💡 아이폰/안드로이드 모두 직관적인 다이렉트 다운로드로 롤백 (쓸데없는 공유 창 제거)
-            forceDownload(canvas.toDataURL('image/png'), fileName, callback);
+    // 약간의 딜레이를 주어 화면이 정상적으로 정렬될 시간을 줌
+    setTimeout(() => {
+        if (typeof html2canvas !== 'undefined') {
+            html2canvas(gameContainer, { 
+                // 💡 고해상도(레티나) 디스플레이에서 텍스트 선명도 개선 및 깨짐 방지
+                scale: window.devicePixelRatio > 1 ? 3 : 2, 
+                backgroundColor: null,
+                useCORS: true,
+                scrollY: 0 // 캡쳐 기준점을 명확하게 고정
+            }).then(canvas => {
+                btnGroup.style.display = 'flex';
+                window.scrollTo(0, originalScrollY); // 원래 스크롤 위치로 즉시 복구
 
-        }).catch(err => {
+                const fileName = `GINI_PIHAGI_SCORE_${score}.png`;
+                forceDownload(canvas.toDataURL('image/png'), fileName, callback);
+
+            }).catch(err => {
+                btnGroup.style.display = 'flex';
+                window.scrollTo(0, originalScrollY);
+                if (callback) {
+                    callback(); 
+                } else {
+                    alert(currentLang === 'kr' ? "오류: 로컬 환경에서는 이미지를 저장할 수 없습니다.\n배포된 웹 주소로 접속해 주세요." : "Cannot save image in local environment due to CORS policy.");
+                }
+            });
+        } else {
             btnGroup.style.display = 'flex';
-            if (callback) {
-                callback(); 
-            } else {
-                alert(currentLang === 'kr' ? "오류: 로컬 환경에서는 이미지를 저장할 수 없습니다.\n배포된 웹 주소로 접속해 주세요." : "Cannot save image in local environment due to CORS policy.");
-            }
-        });
-    } else {
-        btnGroup.style.display = 'flex';
-        if (callback) callback();
-    }
+            window.scrollTo(0, originalScrollY);
+            if (callback) callback();
+        }
+    }, 100);
 }
 
 if (captureBtn) {
