@@ -87,7 +87,6 @@ const i18n = {
         filterPoop: "POOP MODE"   
     },
     kr: {
-        // 💡 '최고'를 '최고 점수'로 모두 변경
         score: "점수", best: "최고 점수", title: "똥 피하기",
         desc: "캐릭터 선택 후<br>시작하세요", startBtn: "시작",
         gameover: "게임 오버", finalScore: "점수", finalBest: "최고 점수",
@@ -454,11 +453,16 @@ function createPoop() {
     });
 }
 
+// 💡 충돌 판정(Hitbox) 최적화: 억울한 죽음 방지
 function checkCollision(rect1, rect2) {
-    return rect1.x < rect2.x + rect2.width &&
-           rect1.x + rect1.width > rect2.x &&
-           rect1.y < rect2.y + rect2.height &&
-           rect1.y + rect1.height > rect2.y;
+    // 캐릭터의 폭/높이를 양옆으로 약 15% 정도 깎아서 진짜 몸통에 닿았을 때만 죽게 만듭니다.
+    const marginX = rect1.width * 0.15; 
+    const marginY = rect1.height * 0.15; 
+
+    return (rect1.x + marginX) < rect2.x + rect2.width &&
+           (rect1.x + rect1.width - marginX) > rect2.x &&
+           (rect1.y + marginY) < rect2.y + rect2.height &&
+           (rect1.y + rect1.height - marginY) > rect2.y;
 }
 
 function drawPlayer(x, y, w, h) {
