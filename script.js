@@ -76,11 +76,10 @@ soundBtn.addEventListener('click', () => {
 
 const i18n = {
     en: {
-        // 💡 텍스트 뒤에 있던 스페이스바 띄어쓰기를 모두 제거 (CSS로 강제 띄움)
         score: "SCORE", best: "BEST", title: "POOP DODGE",
         desc: "Select Character<br>& Start", startBtn: "START",
-        gameover: "GAME OVER", finalScore: "SCORE:", finalBest: "BEST:",
-        finalTime: "TIME:", 
+        gameover: "GAME OVER", finalScore: "SCORE", finalBest: "BEST",
+        finalTime: "TIME", 
         restart: "✨ Change Character ✨", 
         selectChar: "SELECT<br>CHAR",
         captureBtn: "Save Image", copyBtn: "Copy Result", shareXBtn: "Share on X", restartGameBtn: "RESTART",
@@ -88,11 +87,11 @@ const i18n = {
         filterPoop: "POOP MODE"   
     },
     kr: {
-        // 💡 텍스트 뒤에 있던 스페이스바 띄어쓰기를 모두 제거 (CSS로 강제 띄움)
-        score: "점수", best: "최고", title: "똥 피하기",
+        // 💡 '최고'를 '최고 점수'로 모두 변경
+        score: "점수", best: "최고 점수", title: "똥 피하기",
         desc: "캐릭터 선택 후<br>시작하세요", startBtn: "시작",
-        gameover: "게임 오버", finalScore: "점수:", finalBest: "최고:",
-        finalTime: "생존 시간:", 
+        gameover: "게임 오버", finalScore: "점수", finalBest: "최고 점수",
+        finalTime: "생존 시간", 
         restart: "✨ 캐릭터 변경 가능 ✨", 
         selectChar: "캐릭터<br>선택",
         captureBtn: "이미지 저장", copyBtn: "결과 복사", shareXBtn: "X 공유", restartGameBtn: "다시 시작",
