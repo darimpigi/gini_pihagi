@@ -2,12 +2,21 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GINI_PIHAGI</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
 <body>
+    <!-- 💡 가로 모드일 때 나타날 경고 화면 -->
+    <div id="landscape-warning">
+        <div class="warning-content">
+            <span class="warning-icon">📱🔄</span>
+            <h2>세로 모드 최적화</h2>
+            <p>화면을 세로로 돌려서 플레이해 주세요!<br>(Please rotate your device to portrait mode)</p>
+        </div>
+    </div>
+
     <div id="main-wrapper">
         
         <div id="game-layout-wrapper">
@@ -21,7 +30,6 @@
                 </div>
                 
                 <div class="mode-toggle-section">
-                    <!-- 💡 이모지 제거 및 텍스트 굵기 강조를 위한 구조 -->
                     <h3 id="t-filterText">클린 모드</h3>
                     <button id="filter-btn" class="char-btn">
                         <img id="filter-img" src="images/water.png" alt="Mode Toggle">
@@ -58,9 +66,12 @@
                             <h2 id="t-gameover">GAME OVER</h2>
                             <p><span id="t-finalScore">SCORE: </span><span id="finalScore">0</span></p>
                             <p><span id="t-finalBest">BEST: </span><span id="finalBestScore">0</span></p>
-                            <p class="blink-text" id="t-restart">Click or 'R' to Restart</p>
                             
-                            <div class="share-btn-group">
+                            <p><span id="t-finalTime">TIME: </span><span id="finalTime">0.0s</span></p>
+                            
+                            <p class="blink-text" id="t-restart" data-html2canvas-ignore="true">Click or 'R' to Restart</p>
+                            
+                            <div class="share-btn-group" data-html2canvas-ignore="true">
                                 <button id="capture-btn">이미지 저장</button>
                                 <button id="copy-btn">결과 복사</button>
                                 <button id="share-x-btn">X 공유</button>

@@ -1,3 +1,21 @@
+// 💡 1. 게임에 사용되는 모든 이미지를 백그라운드에서 미리 로딩(Preload)
+const imagePathsToPreload = [
+    'images/gini_1.png', 'images/gini_2.png', 'images/rabbit.png',
+    'images/game_over_gini_1.png', 'images/game_over_gini_1_water.png',
+    'images/game_over_gini_2.png', 'images/game_over_gini_2_water.png',
+    'images/game_over_rabbit.png', 'images/game_over_rabbit_water.png',
+    'images/poop.png', 'images/poop_rabbit.png', 'images/water.png',
+    'images/테마배경.jpg'
+];
+const preloadedImages = {}; // 캐싱용 객체
+
+imagePathsToPreload.forEach(path => {
+    const img = new Image();
+    img.src = path;
+    preloadedImages[path] = img; // 브라우저가 미리 싹 받아두도록 메모리에 저장
+});
+
+// 기존 게임 로직 시작
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -34,6 +52,9 @@ const tFilterText = document.getElementById('t-filterText');
 let isSoundOn = true;
 let isWaterMode = false; 
 
+let gameStartTime = 0;
+let playTime = 0;
+
 const audioCache = { gini: [], rabbit: [] };
 try {
     for (let i = 1; i <= 7; i++) {
@@ -60,6 +81,7 @@ const i18n = {
         score: "SCORE ", best: "BEST ", title: "POOP DODGE",
         desc: "Select Character<br>& Start", startBtn: "START",
         gameover: "GAME OVER", finalScore: "SCORE: ", finalBest: "BEST: ",
+        finalTime: "TIME: ", 
         restart: "✨ Change Character ✨", 
         selectChar: "SELECT<br>CHAR",
         captureBtn: "Save Image", copyBtn: "Copy Result", shareXBtn: "Share on X", restartGameBtn: "RESTART",
@@ -70,6 +92,7 @@ const i18n = {
         score: "점수 ", best: "최고 ", title: "똥 피하기",
         desc: "캐릭터 선택 후<br>시작하세요", startBtn: "시작",
         gameover: "게임 오버", finalScore: "점수: ", finalBest: "최고: ",
+        finalTime: "생존 시간: ", 
         restart: "✨ 캐릭터 변경 가능 ✨", 
         selectChar: "캐릭터<br>선택",
         captureBtn: "이미지 저장", copyBtn: "결과 복사", shareXBtn: "X 공유", restartGameBtn: "다시 시작",
@@ -91,6 +114,7 @@ function applyLanguage() {
     document.getElementById('t-gameover').innerText = lang.gameover;
     document.getElementById('t-finalScore').innerText = lang.finalScore;
     document.getElementById('t-finalBest').innerText = lang.finalBest;
+    document.getElementById('t-finalTime').innerText = lang.finalTime; 
     document.getElementById('t-restart').innerText = lang.restart; 
     document.getElementById('t-selectChar').innerHTML = lang.selectChar;
     tFilterText.innerText = isWaterMode ? lang.filterPoop : lang.filterWater; 
@@ -211,7 +235,16 @@ if (restartGameBtn) {
     });
 }
 
-// 💡 캡쳐 에러를 방지하고 X 공유를 무조건 실행하도록 로직 대폭 강화
+function forceDownload(dataUrl, fileName, callback) {
+    const link = document.createElement('a');
+    link.download = fileName;
+    link.href = dataUrl;
+    document.body.appendChild(link); 
+    link.click();
+    document.body.removeChild(link);
+    if (callback) callback();
+}
+
 function captureGameBox(callback) {
     const gameContainer = document.getElementById('game-container');
     const btnGroup = document.querySelector('.share-btn-group');
@@ -222,25 +255,37 @@ function captureGameBox(callback) {
         html2canvas(gameContainer, { 
             scale: 2, 
             backgroundColor: null,
-            useCORS: true // 보안 이슈 최소화를 위해 추가
+            useCORS: true 
         }).then(canvas => {
             btnGroup.style.display = 'flex';
+            const fileName = `GINI_PIHAGI_SCORE_${score}.png`;
 
-            const link = document.createElement('a');
-            link.download = `GINI_PIHAGI_SCORE_${score}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    const file = new File([blob], fileName, { type: 'image/png' });
+                    
+                    if (navigator.canShare && navigator.canShare({ files: [file] }) && !callback) {
+                        navigator.share({
+                            files: [file],
+                            title: 'GINI_PIHAGI',
+                            text: currentLang === 'kr' ? `기니 똥피하기 ${score}점 달성! (⏱ ${playTime}초 생존)` : `I scored ${score} in Poop Dodge! (⏱ Survived ${playTime}s)`
+                        }).catch(() => {
+                            forceDownload(canvas.toDataURL('image/png'), fileName, callback);
+                        });
+                    } else {
+                        forceDownload(canvas.toDataURL('image/png'), fileName, callback);
+                    }
+                } else {
+                    forceDownload(canvas.toDataURL('image/png'), fileName, callback);
+                }
+            }, 'image/png');
 
-            if (callback) callback(); // X 공유 무사히 실행
         }).catch(err => {
-            // 💡 로컬(file://) 환경 등에서 캡쳐가 막혔을 때의 처리
             btnGroup.style.display = 'flex';
             if (callback) {
-                // X 공유 버튼을 눌렀다면 캡쳐를 건너뛰고 텍스트 공유라도 띄우기
                 callback(); 
             } else {
-                // 단순 이미지 저장 버튼을 눌렀다면 이유 설명
-                alert(currentLang === 'kr' ? "컴퓨터 폴더에서 직접 열어 보안 정책으로 인해 이미지를 저장할 수 없습니다.\n\n(웹에 배포된 후에는 정상적으로 저장됩니다!)" : "Cannot save image in local environment due to CORS policy.");
+                alert(currentLang === 'kr' ? "오류: 로컬 환경에서는 이미지를 저장할 수 없습니다.\n배포된 웹 주소로 접속해 주세요." : "Cannot save image in local environment due to CORS policy.");
             }
         });
     } else {
@@ -265,9 +310,9 @@ if (copyBtn) {
         let shareText = "";
         
         if (currentLang === 'kr') {
-            shareText = `기니 똥피하기에서 ${score}점을 달성했어요!\r\n내 기록을 넘어보세요!\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
+            shareText = `기니 똥피하기에서 ${score}점을 달성했어요!\r\n(⏱ 생존 시간: ${playTime}초)\r\n내 기록을 넘어보세요!\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
         } else {
-            shareText = `I scored ${score} in Poop Dodge! 💩\r\nCan you beat my score?\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
+            shareText = `I scored ${score} in Poop Dodge! 💩\r\n(⏱ Survived: ${playTime}s)\r\nCan you beat my score?\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
         }
         
         navigator.clipboard.writeText(shareText).then(() => {
@@ -281,15 +326,14 @@ if (copyBtn) {
 if (shareXBtn) {
     shareXBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        // 💡 캡쳐(captureGameBox)가 실패하더라도 아래의 콜백 함수는 반드시 실행되게 수정했습니다!
         captureGameBox(() => {
             const gameUrl = window.location.href;
             let fullText = "";
 
             if (currentLang === 'kr') {
-                fullText = `기니 똥피하기에서 ${score}점을 달성했어요!\r\n내 기록을 넘어보세요!\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
+                fullText = `기니 똥피하기에서 ${score}점을 달성했어요!\r\n(⏱ 생존 시간: ${playTime}초)\r\n내 기록을 넘어보세요!\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
             } else {
-                fullText = `I scored ${score} in Poop Dodge!\r\nCan you beat my score?\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
+                fullText = `I scored ${score} in Poop Dodge!\r\n(⏱ Survived: ${playTime}s)\r\nCan you beat my score?\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
             }
 
             const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(fullText)}`;
@@ -370,22 +414,23 @@ const handleMoveEnd = (e) => {
     player.dx = 0;
 };
 
-btnLeft.addEventListener('touchstart', handleMoveLeftStart);
-btnLeft.addEventListener('touchend', handleMoveEnd);
+btnLeft.addEventListener('touchstart', handleMoveLeftStart, { passive: false });
+btnLeft.addEventListener('touchend', handleMoveEnd, { passive: false });
 btnLeft.addEventListener('mousedown', handleMoveLeftStart);
 btnLeft.addEventListener('mouseup', handleMoveEnd);
 
-btnRight.addEventListener('touchstart', handleMoveRightStart);
-btnRight.addEventListener('touchend', handleMoveEnd);
+btnRight.addEventListener('touchstart', handleMoveRightStart, { passive: false });
+btnRight.addEventListener('touchend', handleMoveEnd, { passive: false });
 btnRight.addEventListener('mousedown', handleMoveRightStart);
 btnRight.addEventListener('mouseup', handleMoveEnd);
 
 canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault(); 
     if (!isPlaying || isCountingDown || isGameOver) return;
     
     const rect = canvas.getBoundingClientRect();
     const touchX = e.touches[0].clientX - rect.left;
-    const canvasHalfWidth = canvas.width / 2;
+    const canvasHalfWidth = rect.width / 2; 
     
     if (touchX < canvasHalfWidth) {
         if (player.dx !== -player.speed) playMoveSound();
@@ -396,20 +441,23 @@ canvas.addEventListener('touchstart', (e) => {
         player.dx = player.speed;
         player.facingRight = true;
     }
-});
+}, { passive: false });
 
-canvas.addEventListener('touchend', () => {
+canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
     player.dx = 0;
-});
+}, { passive: false });
 
 function createPoop() {
     const size = Math.random() * 10 + 15; 
+    const speedBonus = Math.min(4.0, score * 0.02);
+    
     poops.push({
         x: Math.random() * (canvas.width - size),
         y: -size,
         width: size,
         height: size,
-        speed: Math.random() * 4 + 4,
+        speed: (Math.random() * 4 + 4) + speedBonus, 
         flipX: Math.random() < 0.5, 
         angle: 0,                   
         rotationSpeed: (Math.random() - 0.5) * 0.2 
@@ -496,7 +544,9 @@ function update() {
         }
     }
 
-    if (Math.random() < 0.05) {
+    const spawnRate = Math.min(0.12, 0.05 + (score * 0.0003));
+    
+    if (Math.random() < spawnRate) {
         createPoop();
     }
 
@@ -507,6 +557,8 @@ function endGame() {
     isGameOver = true;
     isPlaying = false;
     cancelAnimationFrame(gameLoop);
+
+    playTime = ((Date.now() - gameStartTime) / 1000).toFixed(1);
 
     char1Btn.classList.remove('disabled');
     char2Btn.classList.remove('disabled');
@@ -530,6 +582,7 @@ function endGame() {
 
     finalScoreElement.innerText = score;
     finalBestScoreElement.innerText = bestScore;
+    document.getElementById('finalTime').innerText = playTime + "s"; 
     
     gameOverScreen.classList.remove('hidden');
 }
@@ -569,6 +622,8 @@ function startCountdown() {
             clearInterval(countdownInterval);
             countdownElement.classList.add('hidden');
             isCountingDown = false;
+            
+            gameStartTime = Date.now(); 
             update();
         }
     }, 1000);

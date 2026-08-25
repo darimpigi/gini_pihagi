@@ -8,6 +8,52 @@ body {
     background-color: #dceddf;
     font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
     color: #4a7c59;
+    
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent; 
+}
+
+/* 💡 가로 모드 경고창 스타일 */
+#landscape-warning {
+    display: none; /* 기본은 숨김 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #4a7c59;
+    color: white;
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.warning-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+    display: block;
+    animation: rotatePhone 2s ease-in-out infinite;
+}
+
+#landscape-warning h2 {
+    font-size: 24px;
+    margin: 0 0 10px 0;
+}
+
+#landscape-warning p {
+    font-size: 14px;
+    color: #dceddf;
+    line-height: 1.5;
+}
+
+@keyframes rotatePhone {
+    0% { transform: rotate(-90deg); }
+    50% { transform: rotate(0deg); }
+    100% { transform: rotate(-90deg); }
 }
 
 #main-wrapper {
@@ -18,6 +64,7 @@ body {
     max-width: 100vw;
     padding: 20px;
     box-sizing: border-box;
+    overflow-x: hidden; 
 }
 
 #game-layout-wrapper {
@@ -31,6 +78,7 @@ body {
     flex-direction: column;
     align-items: center; 
     width: 410px;
+    max-width: 100%; 
 }
 
 #top-bar {
@@ -79,6 +127,7 @@ canvas {
     background-size: cover;
     background-position: center;
     display: block;
+    touch-action: none; 
 }
 
 #ui {
@@ -264,18 +313,18 @@ canvas {
 
 #mobile-controls button {
     width: 48%;
-    height: 50px;
+    height: 65px; 
     background-color: white;
     color: #4a7c59;
     border: 2px solid #b7d8c0;
     border-radius: 15px;
-    font-size: 20px;
+    font-size: 24px; 
     font-weight: bold;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(74, 124, 89, 0.15);
     user-select: none;
     -webkit-user-select: none;
-    touch-action: manipulation;
+    touch-action: none; 
     transition: all 0.1s ease;
 }
 
@@ -348,7 +397,6 @@ canvas {
     transition: filter 0.3s ease;
 }
 
-/* 💡 모자이크 초강력하게 블러 처리 */
 .censored {
     filter: blur(10px) contrast(1.2); 
     transform: scale(0.95);
@@ -364,7 +412,6 @@ canvas {
     width: 100%;
 }
 
-/* 💡 글자를 SELECT CHAR 처럼 두껍고 진하게 통일 */
 #t-filterText {
     margin: 0 0 10px 0;
     font-size: 13px;
@@ -422,5 +469,31 @@ canvas {
     .mode-toggle-section {
         margin-top: 15px;
         padding-top: 15px;
+    }
+}
+
+/* 💡 모바일 가로 모드 감지 (스마트폰 크기에서 가로로 눕혀졌을 때) */
+@media screen and (max-width: 950px) and (orientation: landscape) {
+    #main-wrapper {
+        display: none; /* 메인 게임 화면을 숨김 */
+    }
+    #landscape-warning {
+        display: flex; /* 경고창을 띄움 */
+    }
+}
+
+@media (max-width: 440px) {
+    #main-wrapper {
+        padding: 10px;
+    }
+    #game-area {
+        transform: scale(0.9);
+        transform-origin: top center;
+    }
+}
+@media (max-width: 380px) {
+    #game-area {
+        transform: scale(0.8);
+        transform-origin: top center;
     }
 }
