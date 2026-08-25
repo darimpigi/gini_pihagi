@@ -12,10 +12,9 @@ const preloadedImages = {}; // 캐싱용 객체
 imagePathsToPreload.forEach(path => {
     const img = new Image();
     img.src = path;
-    preloadedImages[path] = img; // 브라우저가 미리 싹 받아두도록 메모리에 저장
+    preloadedImages[path] = img; 
 });
 
-// 기존 게임 로직 시작
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -260,25 +259,8 @@ function captureGameBox(callback) {
             btnGroup.style.display = 'flex';
             const fileName = `GINI_PIHAGI_SCORE_${score}.png`;
 
-            canvas.toBlob((blob) => {
-                if (blob) {
-                    const file = new File([blob], fileName, { type: 'image/png' });
-                    
-                    if (navigator.canShare && navigator.canShare({ files: [file] }) && !callback) {
-                        navigator.share({
-                            files: [file],
-                            title: 'GINI_PIHAGI',
-                            text: currentLang === 'kr' ? `기니 똥피하기 ${score}점 달성! (⏱ ${playTime}초 생존)` : `I scored ${score} in Poop Dodge! (⏱ Survived ${playTime}s)`
-                        }).catch(() => {
-                            forceDownload(canvas.toDataURL('image/png'), fileName, callback);
-                        });
-                    } else {
-                        forceDownload(canvas.toDataURL('image/png'), fileName, callback);
-                    }
-                } else {
-                    forceDownload(canvas.toDataURL('image/png'), fileName, callback);
-                }
-            }, 'image/png');
+            // 💡 아이폰/안드로이드 모두 직관적인 다이렉트 다운로드로 롤백 (쓸데없는 공유 창 제거)
+            forceDownload(canvas.toDataURL('image/png'), fileName, callback);
 
         }).catch(err => {
             btnGroup.style.display = 'flex';
