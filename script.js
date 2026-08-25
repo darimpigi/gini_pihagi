@@ -76,10 +76,11 @@ soundBtn.addEventListener('click', () => {
 
 const i18n = {
     en: {
-        score: "SCORE ", best: "BEST ", title: "POOP DODGE",
+        // 💡 텍스트 뒤에 있던 스페이스바 띄어쓰기를 모두 제거 (CSS로 강제 띄움)
+        score: "SCORE", best: "BEST", title: "POOP DODGE",
         desc: "Select Character<br>& Start", startBtn: "START",
-        gameover: "GAME OVER", finalScore: "SCORE: ", finalBest: "BEST: ",
-        finalTime: "TIME: ", 
+        gameover: "GAME OVER", finalScore: "SCORE:", finalBest: "BEST:",
+        finalTime: "TIME:", 
         restart: "✨ Change Character ✨", 
         selectChar: "SELECT<br>CHAR",
         captureBtn: "Save Image", copyBtn: "Copy Result", shareXBtn: "Share on X", restartGameBtn: "RESTART",
@@ -87,10 +88,11 @@ const i18n = {
         filterPoop: "POOP MODE"   
     },
     kr: {
-        score: "점수 ", best: "최고 ", title: "똥 피하기",
+        // 💡 텍스트 뒤에 있던 스페이스바 띄어쓰기를 모두 제거 (CSS로 강제 띄움)
+        score: "점수", best: "최고", title: "똥 피하기",
         desc: "캐릭터 선택 후<br>시작하세요", startBtn: "시작",
-        gameover: "게임 오버", finalScore: "점수: ", finalBest: "최고: ",
-        finalTime: "생존 시간: ", 
+        gameover: "게임 오버", finalScore: "점수:", finalBest: "최고:",
+        finalTime: "생존 시간:", 
         restart: "✨ 캐릭터 변경 가능 ✨", 
         selectChar: "캐릭터<br>선택",
         captureBtn: "이미지 저장", copyBtn: "결과 복사", shareXBtn: "X 공유", restartGameBtn: "다시 시작",
@@ -243,29 +245,25 @@ function forceDownload(dataUrl, fileName, callback) {
     if (callback) callback();
 }
 
-// 💡 캡쳐 로직: 아이폰 글자 밀림 및 화면 엇나감 완벽 방지
 function captureGameBox(callback) {
     const gameContainer = document.getElementById('game-container');
     const btnGroup = document.querySelector('.share-btn-group');
     
     btnGroup.style.display = 'none'; 
 
-    // 💡 캡쳐 순간에 스크롤이 내려가 있으면 아이폰에서 글자가 밀리는 버그가 발생하므로 강제로 최상단으로 이동
     const originalScrollY = window.scrollY;
     window.scrollTo(0, 0);
 
-    // 약간의 딜레이를 주어 화면이 정상적으로 정렬될 시간을 줌
     setTimeout(() => {
         if (typeof html2canvas !== 'undefined') {
             html2canvas(gameContainer, { 
-                // 💡 고해상도(레티나) 디스플레이에서 텍스트 선명도 개선 및 깨짐 방지
                 scale: window.devicePixelRatio > 1 ? 3 : 2, 
                 backgroundColor: null,
                 useCORS: true,
-                scrollY: 0 // 캡쳐 기준점을 명확하게 고정
+                scrollY: 0 
             }).then(canvas => {
                 btnGroup.style.display = 'flex';
-                window.scrollTo(0, originalScrollY); // 원래 스크롤 위치로 즉시 복구
+                window.scrollTo(0, originalScrollY); 
 
                 const fileName = `GINI_PIHAGI_SCORE_${score}.png`;
                 forceDownload(canvas.toDataURL('image/png'), fileName, callback);

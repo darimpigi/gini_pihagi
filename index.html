@@ -8,7 +8,6 @@
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
 <body>
-    <!-- 💡 가로 모드일 때 나타날 경고 화면 -->
     <div id="landscape-warning">
         <div class="warning-content">
             <span class="warning-icon">📱🔄</span>
@@ -48,8 +47,9 @@
                     
                     <div id="ui">
                         <div id="scoreDisplay">
-                            <div><span id="t-score">SCORE </span><span id="score">0</span></div>
-                            <div id="bestScoreDisplay"><span id="t-best">BEST </span><span id="bestScore">0</span></div>
+                            <!-- 💡 클래스 추가로 간격 분리 -->
+                            <div class="score-line"><span id="t-score">SCORE</span><span id="score">0</span></div>
+                            <div class="best-line"><span id="t-best">BEST</span><span id="bestScore">0</span></div>
                         </div>
                         
                         <div id="countdown" class="hidden">3</div>
@@ -64,10 +64,11 @@
                             <div id="gameOverPlaceholder"></div> 
                             <img id="gameOverImg" src="" alt="Game Over">
                             <h2 id="t-gameover">GAME OVER</h2>
-                            <p><span id="t-finalScore">SCORE: </span><span id="finalScore">0</span></p>
-                            <p><span id="t-finalBest">BEST: </span><span id="finalBestScore">0</span></p>
                             
-                            <p><span id="t-finalTime">TIME: </span><span id="finalTime">0.0s</span></p>
+                            <!-- 💡 겹침 방지를 위해 구조 변경 -->
+                            <div class="result-line"><span id="t-finalScore">SCORE:</span><span id="finalScore">0</span></div>
+                            <div class="result-line"><span id="t-finalBest">BEST:</span><span id="finalBestScore">0</span></div>
+                            <div class="result-line"><span id="t-finalTime">TIME:</span><span id="finalTime">0.0s</span></div>
                             
                             <p class="blink-text" id="t-restart" data-html2canvas-ignore="true">Click or 'R' to Restart</p>
                             
