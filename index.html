@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GINI_PIHAGI</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <!-- 💡 말썽이던 html2canvas 라이브러리 제거 -->
 </head>
 <body>
     <div id="landscape-warning">
@@ -47,7 +47,6 @@
                     
                     <div id="ui">
                         <div id="scoreDisplay">
-                            <!-- 💡 클래스 추가로 간격 분리 -->
                             <div class="score-line"><span id="t-score">SCORE</span><span id="score">0</span></div>
                             <div class="best-line"><span id="t-best">BEST</span><span id="bestScore">0</span></div>
                         </div>
@@ -65,15 +64,14 @@
                             <img id="gameOverImg" src="" alt="Game Over">
                             <h2 id="t-gameover">GAME OVER</h2>
                             
-                            <!-- 💡 겹침 방지를 위해 구조 변경 -->
-                            <div class="result-line"><span id="t-finalScore">SCORE:</span><span id="finalScore">0</span></div>
-                            <div class="result-line"><span id="t-finalBest">BEST:</span><span id="finalBestScore">0</span></div>
-                            <div class="result-line"><span id="t-finalTime">TIME:</span><span id="finalTime">0.0s</span></div>
+                            <div class="result-line"><span id="t-finalScore">SCORE</span><span id="finalScore">0</span></div>
+                            <div class="result-line"><span id="t-finalBest">BEST</span><span id="finalBestScore">0</span></div>
+                            <div class="result-line"><span id="t-finalTime">TIME</span><span id="finalTime">0.0s</span></div>
                             
-                            <p class="blink-text" id="t-restart" data-html2canvas-ignore="true">Click or 'R' to Restart</p>
+                            <p class="blink-text" id="t-restart">Click or 'R' to Restart</p>
                             
-                            <div class="share-btn-group" data-html2canvas-ignore="true">
-                                <button id="capture-btn">이미지 저장</button>
+                            <!-- 💡 캡쳐 버튼 제거 및 버튼 3개로 깔끔하게 정리 -->
+                            <div class="share-btn-group">
                                 <button id="copy-btn">결과 복사</button>
                                 <button id="share-x-btn">X 공유</button>
                                 <button id="restart-game-btn">다시 시작</button>

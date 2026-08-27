@@ -31,7 +31,6 @@ const gameOverPlaceholder = document.getElementById('gameOverPlaceholder');
 const startBtn = document.getElementById('start-btn');
 const langBtn = document.getElementById('lang-btn');
 const soundBtn = document.getElementById('sound-btn');
-const captureBtn = document.getElementById('capture-btn'); 
 const copyBtn = document.getElementById('copy-btn');
 const shareXBtn = document.getElementById('share-x-btn');
 const restartGameBtn = document.getElementById('restart-game-btn');
@@ -82,7 +81,7 @@ const i18n = {
         finalTime: "TIME", 
         restart: "✨ Change Character ✨", 
         selectChar: "SELECT<br>CHAR",
-        captureBtn: "Save Image", copyBtn: "Copy Result", shareXBtn: "Share on X", restartGameBtn: "RESTART",
+        copyBtn: "Copy Result", shareXBtn: "Share on X", restartGameBtn: "RESTART",
         filterWater: "CLEAN MODE", 
         filterPoop: "POOP MODE"   
     },
@@ -93,7 +92,7 @@ const i18n = {
         finalTime: "생존 시간", 
         restart: "✨ 캐릭터 변경 가능 ✨", 
         selectChar: "캐릭터<br>선택",
-        captureBtn: "이미지 저장", copyBtn: "결과 복사", shareXBtn: "X 공유", restartGameBtn: "다시 시작",
+        copyBtn: "결과 복사", shareXBtn: "X 공유", restartGameBtn: "다시 시작",
         filterWater: "클린 모드",
         filterPoop: "똥 모드"
     }
@@ -117,7 +116,6 @@ function applyLanguage() {
     document.getElementById('t-selectChar').innerHTML = lang.selectChar;
     tFilterText.innerText = isWaterMode ? lang.filterPoop : lang.filterWater; 
     
-    if (captureBtn) captureBtn.innerText = lang.captureBtn;
     if (copyBtn) copyBtn.innerText = lang.copyBtn;
     if (shareXBtn) shareXBtn.innerText = lang.shareXBtn;
     if (restartGameBtn) restartGameBtn.innerText = lang.restartGameBtn;
@@ -233,63 +231,6 @@ if (restartGameBtn) {
     });
 }
 
-function forceDownload(dataUrl, fileName, callback) {
-    const link = document.createElement('a');
-    link.download = fileName;
-    link.href = dataUrl;
-    document.body.appendChild(link); 
-    link.click();
-    document.body.removeChild(link);
-    if (callback) callback();
-}
-
-function captureGameBox(callback) {
-    const gameContainer = document.getElementById('game-container');
-    const btnGroup = document.querySelector('.share-btn-group');
-    
-    btnGroup.style.display = 'none'; 
-
-    const originalScrollY = window.scrollY;
-    window.scrollTo(0, 0);
-
-    setTimeout(() => {
-        if (typeof html2canvas !== 'undefined') {
-            html2canvas(gameContainer, { 
-                scale: window.devicePixelRatio > 1 ? 3 : 2, 
-                backgroundColor: null,
-                useCORS: true,
-                scrollY: 0 
-            }).then(canvas => {
-                btnGroup.style.display = 'flex';
-                window.scrollTo(0, originalScrollY); 
-
-                const fileName = `GINI_PIHAGI_SCORE_${score}.png`;
-                forceDownload(canvas.toDataURL('image/png'), fileName, callback);
-
-            }).catch(err => {
-                btnGroup.style.display = 'flex';
-                window.scrollTo(0, originalScrollY);
-                if (callback) {
-                    callback(); 
-                } else {
-                    alert(currentLang === 'kr' ? "오류: 로컬 환경에서는 이미지를 저장할 수 없습니다.\n배포된 웹 주소로 접속해 주세요." : "Cannot save image in local environment due to CORS policy.");
-                }
-            });
-        } else {
-            btnGroup.style.display = 'flex';
-            window.scrollTo(0, originalScrollY);
-            if (callback) callback();
-        }
-    }, 100);
-}
-
-if (captureBtn) {
-    captureBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); 
-        captureGameBox();
-    });
-}
-
 const commonHashtagsText = "#기니똥피하기 #기니피하기 #gini_pihagi #gini_poop_dodge #darim_pigi";
 
 if (copyBtn) {
@@ -312,22 +253,21 @@ if (copyBtn) {
     });
 }
 
+// 💡 캡쳐 로직 없이 즉시 텍스트 공유창 띄우기
 if (shareXBtn) {
     shareXBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        captureGameBox(() => {
-            const gameUrl = window.location.href;
-            let fullText = "";
+        const gameUrl = window.location.href;
+        let fullText = "";
 
-            if (currentLang === 'kr') {
-                fullText = `기니 똥피하기에서 ${score}점을 달성했어요!\r\n(⏱ 생존 시간: ${playTime}초)\r\n내 기록을 넘어보세요!\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
-            } else {
-                fullText = `I scored ${score} in Poop Dodge!\r\n(⏱ Survived: ${playTime}s)\r\nCan you beat my score?\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
-            }
+        if (currentLang === 'kr') {
+            fullText = `기니 똥피하기에서 ${score}점을 달성했어요!\r\n(⏱ 생존 시간: ${playTime}초)\r\n내 기록을 넘어보세요!\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
+        } else {
+            fullText = `I scored ${score} in Poop Dodge!\r\n(⏱ Survived: ${playTime}s)\r\nCan you beat my score?\r\n\r\n👉 ${gameUrl}\r\n\r\n${commonHashtagsText}`;
+        }
 
-            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(fullText)}`;
-            window.open(twitterUrl, '_blank');
-        });
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(fullText)}`;
+        window.open(twitterUrl, '_blank');
     });
 }
 
@@ -453,9 +393,7 @@ function createPoop() {
     });
 }
 
-// 💡 충돌 판정(Hitbox) 최적화: 억울한 죽음 방지
 function checkCollision(rect1, rect2) {
-    // 캐릭터의 폭/높이를 양옆으로 약 15% 정도 깎아서 진짜 몸통에 닿았을 때만 죽게 만듭니다.
     const marginX = rect1.width * 0.15; 
     const marginY = rect1.height * 0.15; 
 
